@@ -3,11 +3,11 @@ import dispy
 import time
 import threading
 
+# job distributor
 def compute_sort_chunk(start, end, path, job_id):
     import socket
     import os
     
-    # Simple sort implementation
     def bubble_sort(data):
         n = len(data)
         for i in range(n):
@@ -45,6 +45,7 @@ def compute_sort_chunk(start, end, path, job_id):
             
     return (socket.gethostname(), job_id, temp_path)
 
+# parallel merging
 class ParallelManager:
     def __init__(self, output_path):
         self.output_path = output_path
@@ -53,6 +54,7 @@ class ParallelManager:
         self.merge_count = 0
         self.completed_jobs = 0
 
+    # merge function
     def merge_two_files(self, file1, file2):
         self.merge_count += 1
         merged_path = f"/mnt/nfsshare/data/merged_{self.merge_count}.tmp"
@@ -78,6 +80,7 @@ class ParallelManager:
         os.remove(file2)
         return merged_path
 
+    # completed job reciever 
     def job_callback(self, job):
         _, _, result = job.result
         self.completed_jobs += 1
@@ -89,6 +92,7 @@ class ParallelManager:
                 new_temp = self.merge_two_files(f1, f2)
                 self.ready_files.append(new_temp)
 
+# run sort
 def run_distributed_sort():
     lines_limit = 1300000
     total_chunks = 96
